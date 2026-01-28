@@ -1,0 +1,44 @@
+server:
+  port: 2020
+
+spring:
+  application:
+    name: mortgage-api
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.mortgage: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator endpoints for production monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
+
+# Application info for actuator
+info:
+  app:
+    name: Mortgage API
+    description: REST API for mortgage interest rates and feasibility checks
+    version: 1.0.0
+
+# OpenAPI/Swagger configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha

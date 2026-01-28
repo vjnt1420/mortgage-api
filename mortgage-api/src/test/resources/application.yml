@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: mortgage-api-test
+
+logging:
+  level:
+    root: WARN
+    com.mortgage: DEBUG
