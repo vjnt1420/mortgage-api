@@ -6,3 +6,21 @@ logging:
   level:
     root: WARN
     com.mortgage: DEBUG
+
+# Mortgage interest rates configuration for tests
+mortgage:
+  rates:
+    - maturityPeriod: 1
+      interestRate: 2.50
+    - maturityPeriod: 5
+      interestRate: 3.00
+    - maturityPeriod: 10
+      interestRate: 3.50
+    - maturityPeriod: 15
+      interestRate: 4.00
+    - maturityPeriod: 20
+      interestRate: 4.25
+    - maturityPeriod: 25
+      interestRate: 4.50
+    - maturityPeriod: 30
+      interestRate: 4.75

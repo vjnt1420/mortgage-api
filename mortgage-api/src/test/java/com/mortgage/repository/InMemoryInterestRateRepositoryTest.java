@@ -1,10 +1,12 @@
 package com.mortgage.repository;
 
+import com.mortgage.config.MortgageRatesConfig;
 import com.mortgage.model.InterestRate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +18,25 @@ class InMemoryInterestRateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryInterestRateRepository();
+        MortgageRatesConfig config = new MortgageRatesConfig();
+        config.setRates(List.of(
+                createRate(1, "2.50"),
+                createRate(5, "3.00"),
+                createRate(10, "3.50"),
+                createRate(15, "4.00"),
+                createRate(20, "4.25"),
+                createRate(25, "4.50"),
+                createRate(30, "4.75")
+        ));
+        repository = new InMemoryInterestRateRepository(config);
         repository.init();
+    }
+
+    private MortgageRatesConfig.Rate createRate(int maturityPeriod, String interestRate) {
+        MortgageRatesConfig.Rate rate = new MortgageRatesConfig.Rate();
+        rate.setMaturityPeriod(maturityPeriod);
+        rate.setInterestRate(new BigDecimal(interestRate));
+        return rate;
     }
 
     @Test
@@ -35,8 +54,8 @@ class InMemoryInterestRateRepositoryTest {
         List<InterestRate> rates = repository.findAll();
 
         for (int i = 0; i < rates.size() - 1; i++) {
-            assertThat(rates.get(i).getMaturityPeriod())
-                    .isLessThan(rates.get(i + 1).getMaturityPeriod());
+            assertThat(rates.get(i).maturityPeriod())
+                    .isLessThan(rates.get(i + 1).maturityPeriod());
         }
     }
 
@@ -46,9 +65,9 @@ class InMemoryInterestRateRepositoryTest {
         Optional<InterestRate> rate = repository.findByMaturityPeriod(30);
 
         assertThat(rate).isPresent();
-        assertThat(rate.get().getMaturityPeriod()).isEqualTo(30);
-        assertThat(rate.get().getInterestRate()).isNotNull();
-        assertThat(rate.get().getLastUpdate()).isNotNull();
+        assertThat(rate.get().maturityPeriod()).isEqualTo(30);
+        assertThat(rate.get().interestRate()).isNotNull();
+        assertThat(rate.get().lastUpdate()).isNotNull();
     }
 
     @Test
@@ -77,7 +96,7 @@ class InMemoryInterestRateRepositoryTest {
         List<InterestRate> rates = repository.findAll();
 
         rates.forEach(rate -> {
-            assertThat(rate.getInterestRate()).isPositive();
+            assertThat(rate.interestRate()).isPositive();
         });
     }
 
@@ -87,7 +106,7 @@ class InMemoryInterestRateRepositoryTest {
         List<InterestRate> rates = repository.findAll();
 
         rates.forEach(rate -> {
-            assertThat(rate.getLastUpdate()).isNotNull();
+            assertThat(rate.lastUpdate()).isNotNull();
         });
     }
 }

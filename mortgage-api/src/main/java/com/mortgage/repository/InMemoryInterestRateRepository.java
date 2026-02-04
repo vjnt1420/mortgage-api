@@ -1,11 +1,12 @@
 package com.mortgage.repository;
 
+import com.mortgage.config.MortgageRatesConfig;
 import com.mortgage.model.InterestRate;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,40 +16,34 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class InMemoryInterestRateRepository implements InterestRateRepository {
 
+    private final MortgageRatesConfig mortgageRatesConfig;
     private final ConcurrentHashMap<Integer, InterestRate> interestRates = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
-        log.info("Initializing interest rates in memory");
+        log.info("Initializing interest rates from configuration");
 
         Instant now = Instant.now();
 
-        // Initialize with sample mortgage interest rates for different maturity periods
-        addRate(1, new BigDecimal("2.50"), now);
-        addRate(5, new BigDecimal("3.00"), now);
-        addRate(10, new BigDecimal("3.50"), now);
-        addRate(15, new BigDecimal("4.00"), now);
-        addRate(20, new BigDecimal("4.25"), now);
-        addRate(25, new BigDecimal("4.50"), now);
-        addRate(30, new BigDecimal("4.75"), now);
+        // Load interest rates from configuration
+        mortgageRatesConfig.getRates().forEach(rate ->
+            interestRates.put(rate.getMaturityPeriod(), InterestRate.builder()
+                    .maturityPeriod(rate.getMaturityPeriod())
+                    .interestRate(rate.getInterestRate())
+                    .lastUpdate(now)
+                    .build())
+        );
 
-        log.info("Initialized {} interest rates", interestRates.size());
-    }
-
-    private void addRate(int maturityPeriod, BigDecimal rate, Instant timestamp) {
-        interestRates.put(maturityPeriod, InterestRate.builder()
-                .maturityPeriod(maturityPeriod)
-                .interestRate(rate)
-                .lastUpdate(timestamp)
-                .build());
+        log.info("Initialized {} interest rates from configuration", interestRates.size());
     }
 
     @Override
     public List<InterestRate> findAll() {
         List<InterestRate> rates = new ArrayList<>(interestRates.values());
-        rates.sort((r1, r2) -> r1.getMaturityPeriod().compareTo(r2.getMaturityPeriod()));
+        rates.sort((r1, r2) -> r1.maturityPeriod().compareTo(r2.maturityPeriod()));
         return Collections.unmodifiableList(rates);
     }
 

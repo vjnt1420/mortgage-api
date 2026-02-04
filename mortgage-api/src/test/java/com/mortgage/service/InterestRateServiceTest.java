@@ -45,7 +45,7 @@ class InterestRateServiceTest {
 
         // Then
         assertThat(result).hasSize(3);
-        assertThat(result).extracting(InterestRate::getMaturityPeriod)
+        assertThat(result).extracting(InterestRate::maturityPeriod)
                 .containsExactly(10, 20, 30);
     }
 
@@ -77,8 +77,8 @@ class InterestRateServiceTest {
         InterestRate result = interestRateService.getInterestRateByMaturityPeriod(30);
 
         // Then
-        assertThat(result.getMaturityPeriod()).isEqualTo(30);
-        assertThat(result.getInterestRate()).isEqualByComparingTo(new BigDecimal("4.75"));
+        assertThat(result.maturityPeriod()).isEqualTo(30);
+        assertThat(result.interestRate()).isEqualByComparingTo(new BigDecimal("4.75"));
     }
 
     @Test

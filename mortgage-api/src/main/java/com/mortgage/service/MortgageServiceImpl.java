@@ -27,7 +27,7 @@ public class MortgageServiceImpl implements MortgageService {
     @Override
     public MortgageCheckResponse checkMortgageFeasibility(MortgageCheckRequest request) {
         log.info("Processing mortgage check request: income={}, loanValue={}, homeValue={}, maturityPeriod={}",
-                request.getIncome(), request.getLoanValue(), request.getHomeValue(), request.getMaturityPeriod());
+                request.income(), request.loanValue(), request.homeValue(), request.maturityPeriod());
 
         // Check business rules for feasibility
         boolean feasible = isMortgageFeasible(request);
@@ -44,20 +44,20 @@ public class MortgageServiceImpl implements MortgageService {
     }
 
     private boolean isMortgageFeasible(MortgageCheckRequest request) {
-        BigDecimal maxAllowedByIncome = request.getIncome().multiply(MAX_INCOME_MULTIPLIER);
+        BigDecimal maxAllowedByIncome = request.income().multiply(MAX_INCOME_MULTIPLIER);
 
         // Rule 1: Mortgage should not exceed 4 times the income
-        boolean withinIncomeLimit = request.getLoanValue().compareTo(maxAllowedByIncome) <= 0;
+        boolean withinIncomeLimit = request.loanValue().compareTo(maxAllowedByIncome) <= 0;
         if (!withinIncomeLimit) {
             log.debug("Loan value {} exceeds maximum allowed by income: {}",
-                    request.getLoanValue(), maxAllowedByIncome);
+                    request.loanValue(), maxAllowedByIncome);
         }
 
         // Rule 2: Mortgage should not exceed the home value
-        boolean withinHomeValueLimit = request.getLoanValue().compareTo(request.getHomeValue()) <= 0;
+        boolean withinHomeValueLimit = request.loanValue().compareTo(request.homeValue()) <= 0;
         if (!withinHomeValueLimit) {
             log.debug("Loan value {} exceeds home value: {}",
-                    request.getLoanValue(), request.getHomeValue());
+                    request.loanValue(), request.homeValue());
         }
 
         return withinIncomeLimit && withinHomeValueLimit;
@@ -65,17 +65,17 @@ public class MortgageServiceImpl implements MortgageService {
 
     private BigDecimal calculateMonthlyCosts(MortgageCheckRequest request) {
         // Get the interest rate for the requested maturity period
-        InterestRate interestRate = interestRateService.getInterestRateByMaturityPeriod(request.getMaturityPeriod());
+        InterestRate interestRate = interestRateService.getInterestRateByMaturityPeriod(request.maturityPeriod());
 
         // Convert annual interest rate percentage to monthly decimal rate
         // e.g., 4.5% -> 0.045 / 12 = 0.00375
-        BigDecimal annualRate = interestRate.getInterestRate()
+        BigDecimal annualRate = interestRate.interestRate()
                 .divide(BigDecimal.valueOf(100), CALCULATION_SCALE, RoundingMode.HALF_UP);
         BigDecimal monthlyRate = annualRate
                 .divide(BigDecimal.valueOf(MONTHS_PER_YEAR), CALCULATION_SCALE, RoundingMode.HALF_UP);
 
         // Calculate total number of payments
-        int totalPayments = request.getMaturityPeriod() * MONTHS_PER_YEAR;
+        int totalPayments = request.maturityPeriod() * MONTHS_PER_YEAR;
 
         // Calculate monthly payment using the standard mortgage formula:
         // M = P * [r(1+r)^n] / [(1+r)^n - 1]
@@ -87,7 +87,7 @@ public class MortgageServiceImpl implements MortgageService {
 
         if (monthlyRate.compareTo(BigDecimal.ZERO) == 0) {
             // If interest rate is 0, simply divide principal by number of payments
-            return request.getLoanValue()
+            return request.loanValue()
                     .divide(BigDecimal.valueOf(totalPayments), RESULT_SCALE, RoundingMode.HALF_UP);
         }
 
@@ -102,7 +102,7 @@ public class MortgageServiceImpl implements MortgageService {
         BigDecimal denominator = compoundFactor.subtract(BigDecimal.ONE);
 
         // P * [r(1+r)^n] / [(1+r)^n - 1]
-        BigDecimal monthlyPayment = request.getLoanValue()
+        BigDecimal monthlyPayment = request.loanValue()
                 .multiply(numerator, MATH_CONTEXT)
                 .divide(denominator, RESULT_SCALE, RoundingMode.HALF_UP);
 

@@ -61,8 +61,8 @@ class MortgageServiceTest {
             MortgageCheckResponse response = mortgageService.checkMortgageFeasibility(request);
 
             // Then
-            assertThat(response.isFeasible()).isTrue();
-            assertThat(response.getMonthlyCosts()).isNotNull();
+            assertThat(response.feasible()).isTrue();
+            assertThat(response.monthlyCosts()).isNotNull();
         }
 
         @Test
@@ -82,7 +82,7 @@ class MortgageServiceTest {
             MortgageCheckResponse response = mortgageService.checkMortgageFeasibility(request);
 
             // Then
-            assertThat(response.isFeasible()).isFalse();
+            assertThat(response.feasible()).isFalse();
         }
 
         @Test
@@ -102,7 +102,7 @@ class MortgageServiceTest {
             MortgageCheckResponse response = mortgageService.checkMortgageFeasibility(request);
 
             // Then
-            assertThat(response.isFeasible()).isFalse();
+            assertThat(response.feasible()).isFalse();
         }
 
         @Test
@@ -122,7 +122,7 @@ class MortgageServiceTest {
             MortgageCheckResponse response = mortgageService.checkMortgageFeasibility(request);
 
             // Then
-            assertThat(response.isFeasible()).isTrue();
+            assertThat(response.feasible()).isTrue();
         }
 
         @Test
@@ -142,7 +142,7 @@ class MortgageServiceTest {
             MortgageCheckResponse response = mortgageService.checkMortgageFeasibility(request);
 
             // Then
-            assertThat(response.isFeasible()).isTrue();
+            assertThat(response.feasible()).isTrue();
         }
     }
 
@@ -169,7 +169,7 @@ class MortgageServiceTest {
             // Then
             // Expected monthly payment for $200,000 loan at 4.75% for 30 years
             // Using standard mortgage formula: ~$1043.29
-            assertThat(response.getMonthlyCosts())
+            assertThat(response.monthlyCosts())
                     .isGreaterThan(new BigDecimal("1000"))
                     .isLessThan(new BigDecimal("1100"));
         }
@@ -198,7 +198,7 @@ class MortgageServiceTest {
 
             // Then
             // Shorter term = higher monthly payment
-            assertThat(response.getMonthlyCosts()).isGreaterThan(new BigDecimal("900"));
+            assertThat(response.monthlyCosts()).isGreaterThan(new BigDecimal("900"));
         }
 
         @Test
